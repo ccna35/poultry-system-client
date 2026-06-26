@@ -1,4 +1,4 @@
-const arabicNumberFormatter = new Intl.NumberFormat("ar-EG")
+﻿const arabicNumberFormatter = new Intl.NumberFormat("ar-EG")
 
 const arabicCurrencyFormatter = new Intl.NumberFormat("ar-EG", {
     style: "currency",
@@ -37,5 +37,5 @@ export function formatNullableNumber(
     value: number | null,
     formatter: (nextValue: number) => string = formatNumber
 ) {
-    return value === null ? "—" : formatter(value)
+    return value === null ? "--" : formatter(value)
 }
