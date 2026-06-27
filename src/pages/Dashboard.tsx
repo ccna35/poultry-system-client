@@ -227,7 +227,7 @@ export default function Dashboard() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
-                متوسط الوزن
+                متوسط الوزن (كجم)
               </h3>
             </div>
             <Scale className="size-4 text-[#72AE71]" />

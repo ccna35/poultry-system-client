@@ -45,6 +45,7 @@ export type DailyLog = {
     date: string
     deaths: number
     feedConsumedKg: number
+    waterConsumedLiters: number
     temperature: Nullable<number>
     humidity: Nullable<number>
     notes: Nullable<string>
@@ -79,7 +80,7 @@ export type MedicationLog = {
     cycleId: string
     date: string
     medicineName: string
-    dosage: string
+    dosage: MedicationDosage
     cost: number
     notes: Nullable<string>
     createdAt: string
@@ -161,6 +162,7 @@ export type CreateDailyLogRequest = {
     date: string
     deaths: number
     feedConsumedKg: number
+    waterConsumedLiters: number
     temperature?: Nullable<number>
     humidity?: Nullable<number>
     notes?: Nullable<string>
@@ -180,11 +182,20 @@ export type CreateWeightLogRequest = {
     notes?: Nullable<string>
 }
 
+export type DosageUnit = "ملعقة" | "جرام" | "مل" | "سم";
+export type DosagePerUnit = "لتر" | "طائر" | "كجم";
+
+export interface MedicationDosage {
+    amount: number;        // 10
+    unit: DosageUnit;      // spoon | g | ml | cc
+    perAmount?: number;    // default 1
+    perUnit: DosagePerUnit; // liter
+}
+
 export type CreateMedicationLogRequest = {
     date: string
     medicineName: string
-    dosage: string
-    cost: number
+    dosage: MedicationDosage
     notes?: Nullable<string>
 }
 

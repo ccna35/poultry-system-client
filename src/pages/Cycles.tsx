@@ -1,6 +1,8 @@
 ﻿import { useState } from "react"
 
-import ActionNotice, { type StatusMessage } from "@/components/common/ActionNotice"
+import ActionNotice, {
+  type StatusMessage,
+} from "@/components/common/ActionNotice"
 import FormPanel from "@/components/common/FormPanel"
 import InputField from "@/components/common/InputField"
 import PageHeader from "@/components/common/PageHeader"
@@ -15,7 +17,8 @@ import { toNumber } from "@/lib/farm-utils"
 import type { CreateCycleRequest } from "@/types/api"
 
 export default function Cycles() {
-  const { cycles, selectedCycleId, setSelectedCycleId, refreshAll } = useFarmCycle()
+  const { cycles, selectedCycleId, setSelectedCycleId, refreshAll } =
+    useFarmCycle()
   const createCycleMutation = useCreateCycleMutation()
   const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null)
   const [cycleForm, setCycleForm] = useState({
@@ -71,7 +74,7 @@ export default function Cycles() {
   return (
     <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
       <div className="space-y-5">
-        <SurfaceCard className="p-5 sm:p-6">
+        {/* <SurfaceCard className="p-5 sm:p-6">
           <PageHeader
             eyebrow="الدورات"
             title="إدارة دورات الإنتاج"
@@ -88,7 +91,7 @@ export default function Cycles() {
               </Button>
             }
           />
-        </SurfaceCard>
+        </SurfaceCard> */}
 
         <div className="grid gap-4 md:grid-cols-2">
           {cycles.map((cycle) => (
@@ -106,13 +109,14 @@ export default function Cycles() {
                     >
                       {cycle.status}
                     </span>
-                    <span className="text-xs text-slate-400">{cycle.id}</span>
+                    {/* <span className="text-xs text-slate-400">{cycle.id}</span> */}
                   </div>
                   <h3 className="font-heading text-xl font-semibold text-slate-900">
                     {cycle.name}
                   </h3>
                   <p className="mt-2 text-sm text-slate-500">
-                    بدأت {formatDate(cycle.startDate)} • {formatNumber(cycle.initialBirds)} طائر
+                    بدأت {formatDate(cycle.startDate)} •{" "}
+                    {formatNumber(cycle.initialBirds)} طائر
                   </p>
                 </div>
                 <Button
@@ -163,7 +167,10 @@ export default function Cycles() {
             <TextInput
               value={cycleForm.name}
               onChange={(event) => {
-                setCycleForm((current) => ({ ...current, name: event.target.value }))
+                setCycleForm((current) => ({
+                  ...current,
+                  name: event.target.value,
+                }))
               }}
               required
             />
@@ -173,7 +180,10 @@ export default function Cycles() {
               type="date"
               value={cycleForm.startDate}
               onChange={(event) => {
-                setCycleForm((current) => ({ ...current, startDate: event.target.value }))
+                setCycleForm((current) => ({
+                  ...current,
+                  startDate: event.target.value,
+                }))
               }}
               required
             />
@@ -185,7 +195,10 @@ export default function Cycles() {
                 min="1"
                 value={cycleForm.initialBirds}
                 onChange={(event) => {
-                  setCycleForm((current) => ({ ...current, initialBirds: event.target.value }))
+                  setCycleForm((current) => ({
+                    ...current,
+                    initialBirds: event.target.value,
+                  }))
                 }}
                 required
               />
@@ -197,7 +210,10 @@ export default function Cycles() {
                 step="0.01"
                 value={cycleForm.chickPrice}
                 onChange={(event) => {
-                  setCycleForm((current) => ({ ...current, chickPrice: event.target.value }))
+                  setCycleForm((current) => ({
+                    ...current,
+                    chickPrice: event.target.value,
+                  }))
                 }}
                 required
               />
@@ -211,7 +227,10 @@ export default function Cycles() {
                 step="0.01"
                 value={cycleForm.expectedFinalWeightKg}
                 onChange={(event) => {
-                  setCycleForm((current) => ({ ...current, expectedFinalWeightKg: event.target.value }))
+                  setCycleForm((current) => ({
+                    ...current,
+                    expectedFinalWeightKg: event.target.value,
+                  }))
                 }}
                 required
               />
@@ -223,7 +242,10 @@ export default function Cycles() {
                 step="0.01"
                 value={cycleForm.expectedSellingPricePerKg}
                 onChange={(event) => {
-                  setCycleForm((current) => ({ ...current, expectedSellingPricePerKg: event.target.value }))
+                  setCycleForm((current) => ({
+                    ...current,
+                    expectedSellingPricePerKg: event.target.value,
+                  }))
                 }}
                 required
               />
@@ -236,7 +258,10 @@ export default function Cycles() {
               step="0.01"
               value={cycleForm.expectedRemainingCost}
               onChange={(event) => {
-                setCycleForm((current) => ({ ...current, expectedRemainingCost: event.target.value }))
+                setCycleForm((current) => ({
+                  ...current,
+                  expectedRemainingCost: event.target.value,
+                }))
               }}
               required
             />

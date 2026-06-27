@@ -28,6 +28,7 @@ export default function DailyLogs() {
     deaths: "0",
     feedConsumedKg: "",
     temperature: "",
+    waterConsumedLiters: "",
     humidity: "",
     notes: "",
   })
@@ -49,6 +50,7 @@ export default function DailyLogs() {
       date: form.date,
       deaths: toNumber(form.deaths),
       feedConsumedKg: toNumber(form.feedConsumedKg),
+      waterConsumedLiters: toNumber(form.waterConsumedLiters),
       temperature: toOptionalNumber(form.temperature),
       humidity: toOptionalNumber(form.humidity),
       notes: form.notes.trim() === "" ? null : form.notes,
@@ -61,6 +63,7 @@ export default function DailyLogs() {
           date: "",
           deaths: "0",
           feedConsumedKg: "",
+          waterConsumedLiters: "",
           temperature: "",
           humidity: "",
           notes: "",
@@ -68,6 +71,8 @@ export default function DailyLogs() {
         setStatusMessage({ tone: "success", text: "تمت إضافة السجل اليومي." })
       })
       .catch((error: unknown) => {
+        console.log("error", error)
+
         setStatusMessage({
           tone: "error",
           text:
@@ -108,7 +113,7 @@ export default function DailyLogs() {
               required
             />
           </InputField>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <InputField label="الوفيات">
               <TextInput
                 type="number"
@@ -118,6 +123,20 @@ export default function DailyLogs() {
                   setForm((current) => ({
                     ...current,
                     deaths: event.target.value,
+                  }))
+                }
+                required
+              />
+            </InputField>
+            <InputField label="استهلاك المياه">
+              <TextInput
+                type="number"
+                min="0"
+                value={form.waterConsumedLiters}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    waterConsumedLiters: event.target.value,
                   }))
                 }
                 required
@@ -201,6 +220,12 @@ export default function DailyLogs() {
             title: "العلف",
             render: (row: DailyLog) =>
               `${formatNumber(row.feedConsumedKg)} كجم`,
+          },
+          {
+            key: "water",
+            title: "المياه",
+            render: (row: DailyLog) =>
+              `${formatNumber(row.waterConsumedLiters)} لتر`,
           },
           {
             key: "temp",
