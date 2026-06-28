@@ -1,6 +1,8 @@
 ﻿import { useState } from "react"
 
-import ActionNotice, { type StatusMessage } from "@/components/common/ActionNotice"
+import ActionNotice, {
+  type StatusMessage,
+} from "@/components/common/ActionNotice"
 import DataTable from "@/components/common/DataTable"
 import EmptyState from "@/components/common/EmptyState"
 import FormPanel from "@/components/common/FormPanel"
@@ -11,21 +13,22 @@ import SurfaceCard from "@/components/common/SurfaceCard"
 import TextInput from "@/components/common/TextInput"
 import { useFarmCycle } from "@/context/FarmCycleContext"
 import { useCreateFeedPurchaseMutation } from "@/hooks/use-farm-mutations"
-import { useFeedPurchasesQuery } from "@/hooks/use-farm-queries"
+import {
+  useFeedBalancesQuery,
+  useFeedPurchasesQuery,
+} from "@/hooks/use-farm-queries"
 import { formatCurrency, formatDate, formatNumber } from "@/lib/format"
 import { toNumber } from "@/lib/farm-utils"
 import type { CreateFeedPurchaseRequest, FeedType } from "@/types/api"
-
-const feedTypeOptions: Array<{ label: string; value: FeedType }> = [
-  { label: "بادئ", value: "STARTER" },
-  { label: "نامي", value: "GROWER" },
-  { label: "ناهٍ", value: "FINISHER" },
-]
+import { feedTypeOptions } from "@/common"
+import { FeedBalanceCards } from "@/components/feedPurchase/FeedBalanceCards"
 
 export default function FeedPurchases() {
   const { selectedCycle, selectedCycleId } = useFarmCycle()
   const feedPurchasesQuery = useFeedPurchasesQuery(selectedCycleId)
-  const createFeedPurchaseMutation = useCreateFeedPurchaseMutation(selectedCycleId)
+  const feedBalancesQuery = useFeedBalancesQuery(selectedCycleId)
+  const createFeedPurchaseMutation =
+    useCreateFeedPurchaseMutation(selectedCycleId)
   const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null)
   const [form, setForm] = useState({
     purchaseDate: "",
@@ -35,7 +38,12 @@ export default function FeedPurchases() {
   })
 
   if (!selectedCycleId) {
-    return <EmptyState title="لا توجد دورة محددة" description="اختر دورة أولًا لتسجيل مشتريات العلف." />
+    return (
+      <EmptyState
+        title="لا توجد دورة محددة"
+        description="اختر دورة أولًا لتسجيل مشتريات العلف."
+      />
+    )
   }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -52,13 +60,19 @@ export default function FeedPurchases() {
     void createFeedPurchaseMutation
       .mutateAsync(payload)
       .then(() => {
-        setForm({ purchaseDate: "", feedType: "STARTER", quantityKg: "", unitPrice: "" })
+        setForm({
+          purchaseDate: "",
+          feedType: "STARTER",
+          quantityKg: "",
+          unitPrice: "",
+        })
         setStatusMessage({ tone: "success", text: "تم تسجيل شراء العلف." })
       })
       .catch((error: unknown) => {
         setStatusMessage({
           tone: "error",
-          text: error instanceof Error ? error.message : "تعذر تسجيل شراء العلف.",
+          text:
+            error instanceof Error ? error.message : "تعذر تسجيل شراء العلف.",
         })
       })
   }
@@ -89,25 +103,41 @@ export default function FeedPurchases() {
             <TextInput
               type="date"
               value={form.purchaseDate}
-              onChange={(event) => setForm((current) => ({ ...current, purchaseDate: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  purchaseDate: event.target.value,
+                }))
+              }
               required
             />
           </InputField>
-          <InputField label="نوع العلف">
-            <SelectInput
-              value={form.feedType}
-              onChange={(event) => setForm((current) => ({ ...current, feedType: event.target.value as FeedType }))}
-              options={feedTypeOptions}
-            />
-          </InputField>
-          <div className="grid gap-4 md:grid-cols-2">
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <InputField label="نوع العلف">
+              <SelectInput
+                value={form.feedType}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    feedType: event.target.value as FeedType,
+                  }))
+                }
+                options={feedTypeOptions}
+              />
+            </InputField>
             <InputField label="الكمية (كجم)">
               <TextInput
                 type="number"
                 min="0.1"
                 step="0.01"
                 value={form.quantityKg}
-                onChange={(event) => setForm((current) => ({ ...current, quantityKg: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    quantityKg: event.target.value,
+                  }))
+                }
                 required
               />
             </InputField>
@@ -117,7 +147,12 @@ export default function FeedPurchases() {
                 min="0"
                 step="0.01"
                 value={form.unitPrice}
-                onChange={(event) => setForm((current) => ({ ...current, unitPrice: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    unitPrice: event.target.value,
+                  }))
+                }
                 required
               />
             </InputField>
@@ -125,22 +160,44 @@ export default function FeedPurchases() {
         </FormPanel>
       </div>
 
-      <DataTable
-        title="مشتريات العلف"
-        rows={rows}
-        emptyText="لا توجد مشتريات علف مسجلة حتى الآن."
-        columns={[
-          { key: "date", title: "التاريخ", render: (row) => formatDate(row.purchaseDate) },
-          {
-            key: "type",
-            title: "النوع",
-            render: (row) => feedTypeOptions.find((option) => option.value === row.feedType)?.label ?? row.feedType,
-          },
-          { key: "qty", title: "الكمية", render: (row) => `${formatNumber(row.quantityKg)} كجم` },
-          { key: "price", title: "سعر الوحدة", render: (row) => formatCurrency(row.unitPrice) },
-          { key: "total", title: "الإجمالي", render: (row) => formatCurrency(row.quantityKg * row.unitPrice) },
-        ]}
-      />
+      <div className="flex flex-col gap-4">
+        <FeedBalanceCards balances={feedBalancesQuery?.data || []} />
+
+        <DataTable
+          title="مشتريات العلف"
+          rows={rows}
+          emptyText="لا توجد مشتريات علف مسجلة حتى الآن."
+          columns={[
+            {
+              key: "date",
+              title: "التاريخ",
+              render: (row) => formatDate(row.purchaseDate),
+            },
+            {
+              key: "type",
+              title: "النوع",
+              render: (row) =>
+                feedTypeOptions.find((option) => option.value === row.feedType)
+                  ?.label ?? row.feedType,
+            },
+            {
+              key: "qty",
+              title: "الكمية",
+              render: (row) => `${formatNumber(row.quantityKg)} كجم`,
+            },
+            {
+              key: "price",
+              title: "سعر الوحدة",
+              render: (row) => formatCurrency(row.unitPrice),
+            },
+            {
+              key: "total",
+              title: "الإجمالي",
+              render: (row) => formatCurrency(row.quantityKg * row.unitPrice),
+            },
+          ]}
+        />
+      </div>
     </div>
   )
 }

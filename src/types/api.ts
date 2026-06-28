@@ -64,6 +64,11 @@ export type FeedPurchase = {
     updatedAt: string
 }
 
+export interface FeedBalance {
+    feedType: FeedType;
+    quantityKg: number;
+}
+
 export type WeightLog = {
     id: string
     cycleId: string
@@ -104,8 +109,7 @@ export type Sale = {
     id: string
     cycleId: string
     saleDate: string
-    birdsSold: number
-    averageSellingWeightKg: number
+    totalWeightKg: number
     pricePerKg: number
     createdAt: string
     updatedAt: string
@@ -162,6 +166,7 @@ export type CreateDailyLogRequest = {
     date: string
     deaths: number
     feedConsumedKg: number
+    feedType: FeedType
     waterConsumedLiters: number
     temperature?: Nullable<number>
     humidity?: Nullable<number>
@@ -208,8 +213,7 @@ export type CreateManualExpenseRequest = {
 
 export type CreateSaleRequest = {
     saleDate: string
-    birdsSold: number
-    averageSellingWeightKg: number
+    totalWeightKg: number
     pricePerKg: number
 }
 

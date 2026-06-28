@@ -9,6 +9,7 @@ import type {
     DailyLog,
     Expense,
     ExpenseBreakdown,
+    FeedBalance,
     FeedPurchase,
     MedicationLog,
     Sale,
@@ -46,6 +47,15 @@ export const operationsService = {
     async listFeedPurchases(cycleId: string, signal?: AbortSignal) {
         const response = await apiRequest<FeedPurchase[]>(
             buildPath(cycleId, "feed-purchases"),
+            { signal }
+        )
+
+        return response.data
+    },
+
+    async listFeedBalances(cycleId: string, signal?: AbortSignal) {
+        const response = await apiRequest<FeedBalance[]>(
+            buildPath(cycleId, "feed-purchases/balances"),
             { signal }
         )
 

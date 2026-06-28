@@ -59,6 +59,16 @@ export function useFeedPurchasesQuery(cycleId: string | null) {
   })
 }
 
+export function useFeedBalancesQuery(cycleId: string | null) {
+  return useQuery({
+    queryKey: cycleId
+      ? farmQueryKeys.feedBalances(cycleId)
+      : ["farm", "feed-balances"],
+    queryFn: ({ signal }) => operationsService.listFeedBalances(cycleId!, signal),
+    enabled: Boolean(cycleId),
+  })
+}
+
 export function useWeightLogsQuery(cycleId: string | null) {
   return useQuery({
     queryKey: cycleId ? farmQueryKeys.weightLogs(cycleId) : ["farm", "weight-logs"],

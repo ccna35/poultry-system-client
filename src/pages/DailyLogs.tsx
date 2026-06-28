@@ -16,7 +16,9 @@ import { useCreateDailyLogMutation } from "@/hooks/use-farm-mutations"
 import { useDailyLogsQuery } from "@/hooks/use-farm-queries"
 import { formatDate, formatNullableNumber, formatNumber } from "@/lib/format"
 import { toNumber, toOptionalNumber } from "@/lib/farm-utils"
-import type { CreateDailyLogRequest, DailyLog } from "@/types/api"
+import type { CreateDailyLogRequest, DailyLog, FeedType } from "@/types/api"
+import SelectInput from "@/components/common/SelectInput"
+import { feedTypeOptions } from "@/common"
 
 export default function DailyLogs() {
   const { selectedCycle, selectedCycleId } = useFarmCycle()
@@ -27,6 +29,7 @@ export default function DailyLogs() {
     date: "",
     deaths: "0",
     feedConsumedKg: "",
+    feedType: "STARTER" as FeedType,
     temperature: "",
     waterConsumedLiters: "",
     humidity: "",
@@ -50,6 +53,7 @@ export default function DailyLogs() {
       date: form.date,
       deaths: toNumber(form.deaths),
       feedConsumedKg: toNumber(form.feedConsumedKg),
+      feedType: form.feedType,
       waterConsumedLiters: toNumber(form.waterConsumedLiters),
       temperature: toOptionalNumber(form.temperature),
       humidity: toOptionalNumber(form.humidity),
@@ -63,6 +67,7 @@ export default function DailyLogs() {
           date: "",
           deaths: "0",
           feedConsumedKg: "",
+          feedType: "STARTER",
           waterConsumedLiters: "",
           temperature: "",
           humidity: "",
@@ -113,7 +118,7 @@ export default function DailyLogs() {
               required
             />
           </InputField>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <InputField label="الوفيات">
               <TextInput
                 type="number"
@@ -142,6 +147,8 @@ export default function DailyLogs() {
                 required
               />
             </InputField>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <InputField label="استهلاك العلف (كجم)">
               <TextInput
                 type="number"
@@ -155,6 +162,18 @@ export default function DailyLogs() {
                   }))
                 }
                 required
+              />
+            </InputField>
+            <InputField label="نوع العلف">
+              <SelectInput
+                value={form.feedType}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    feedType: event.target.value as FeedType,
+                  }))
+                }
+                options={feedTypeOptions}
               />
             </InputField>
           </div>

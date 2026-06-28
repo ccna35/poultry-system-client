@@ -1,7 +1,9 @@
 ﻿import { useState } from "react"
 import { CircleDollarSign } from "lucide-react"
 
-import ActionNotice, { type StatusMessage } from "@/components/common/ActionNotice"
+import ActionNotice, {
+  type StatusMessage,
+} from "@/components/common/ActionNotice"
 import EmptyState from "@/components/common/EmptyState"
 import FormPanel from "@/components/common/FormPanel"
 import InputField from "@/components/common/InputField"
@@ -10,8 +12,16 @@ import SurfaceCard from "@/components/common/SurfaceCard"
 import TextInput from "@/components/common/TextInput"
 import { useFarmCycle } from "@/context/FarmCycleContext"
 import { useCreateSaleMutation } from "@/hooks/use-farm-mutations"
-import { useDashboardSummaryQuery, useSaleQuery } from "@/hooks/use-farm-queries"
-import { formatCurrency, formatDate, formatNullableNumber, formatNumber } from "@/lib/format"
+import {
+  useDashboardSummaryQuery,
+  useSaleQuery,
+} from "@/hooks/use-farm-queries"
+import {
+  formatCurrency,
+  formatDate,
+  formatNullableNumber,
+  formatNumber,
+} from "@/lib/format"
 import { toNumber } from "@/lib/farm-utils"
 import type { CreateSaleRequest } from "@/types/api"
 
@@ -23,13 +33,17 @@ export default function Sales() {
   const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null)
   const [form, setForm] = useState({
     saleDate: "",
-    birdsSold: "",
-    averageSellingWeightKg: "",
+    totalWeightKg: "",
     pricePerKg: "",
   })
 
   if (!selectedCycleId) {
-    return <EmptyState title="لا توجد دورة محددة" description="اختر دورة أولًا لتسجيل البيع." />
+    return (
+      <EmptyState
+        title="لا توجد دورة محددة"
+        description="اختر دورة أولًا لتسجيل البيع."
+      />
+    )
   }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -38,15 +52,14 @@ export default function Sales() {
 
     const payload: CreateSaleRequest = {
       saleDate: form.saleDate,
-      birdsSold: toNumber(form.birdsSold),
-      averageSellingWeightKg: toNumber(form.averageSellingWeightKg),
+      totalWeightKg: toNumber(form.totalWeightKg),
       pricePerKg: toNumber(form.pricePerKg),
     }
 
     void createSaleMutation
       .mutateAsync(payload)
       .then(() => {
-        setForm({ saleDate: "", birdsSold: "", averageSellingWeightKg: "", pricePerKg: "" })
+        setForm({ saleDate: "", totalWeightKg: "", pricePerKg: "" })
         setStatusMessage({ tone: "success", text: "تم تسجيل عملية البيع." })
       })
       .catch((error: unknown) => {
@@ -79,19 +92,51 @@ export default function Sales() {
           onSubmit={onSubmit}
         >
           <InputField label="تاريخ البيع">
-            <TextInput type="date" value={form.saleDate} onChange={(event) => setForm((current) => ({ ...current, saleDate: event.target.value }))} required />
+            <TextInput
+              type="date"
+              value={form.saleDate}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  saleDate: event.target.value,
+                }))
+              }
+              required
+            />
           </InputField>
           <div className="grid gap-4 md:grid-cols-2">
-            <InputField label="عدد الطيور المباعة">
-              <TextInput type="number" min="1" value={form.birdsSold} onChange={(event) => setForm((current) => ({ ...current, birdsSold: event.target.value }))} required />
+            <InputField label="الوزن الكلى عند البيع">
+              <TextInput
+                type="number"
+                min="0.1"
+                step="0.01"
+                value={form.totalWeightKg}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    totalWeightKg: event.target.value,
+                  }))
+                }
+                required
+              />
             </InputField>
-            <InputField label="متوسط وزن البيع">
-              <TextInput type="number" min="0.1" step="0.01" value={form.averageSellingWeightKg} onChange={(event) => setForm((current) => ({ ...current, averageSellingWeightKg: event.target.value }))} required />
+
+            <InputField label="سعر البيع لكل كجم">
+              <TextInput
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.pricePerKg}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    pricePerKg: event.target.value,
+                  }))
+                }
+                required
+              />
             </InputField>
           </div>
-          <InputField label="سعر البيع لكل كجم">
-            <TextInput type="number" min="0" step="0.01" value={form.pricePerKg} onChange={(event) => setForm((current) => ({ ...current, pricePerKg: event.target.value }))} required />
-          </InputField>
         </FormPanel>
       </div>
 
@@ -100,7 +145,9 @@ export default function Sales() {
           <div className="mb-5 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">ملخص البيع</p>
-              <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">وضع البيع الحالي</h3>
+              <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
+                وضع البيع الحالي
+              </h3>
             </div>
             <CircleDollarSign className="size-5 text-[#74A36A]" />
           </div>
@@ -108,19 +155,21 @@ export default function Sales() {
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl bg-[#F7FAF5] p-4">
                 <p className="text-xs text-slate-400">تاريخ البيع</p>
-                <p className="mt-1 font-medium text-slate-900">{formatDate(sale.saleDate)}</p>
+                <p className="mt-1 font-medium text-slate-900">
+                  {formatDate(sale.saleDate)}
+                </p>
               </div>
               <div className="rounded-2xl bg-[#F7FAF5] p-4">
-                <p className="text-xs text-slate-400">عدد الطيور المباعة</p>
-                <p className="mt-1 font-medium text-slate-900">{formatNumber(sale.birdsSold)}</p>
-              </div>
-              <div className="rounded-2xl bg-[#F7FAF5] p-4">
-                <p className="text-xs text-slate-400">متوسط وزن البيع</p>
-                <p className="mt-1 font-medium text-slate-900">{formatNumber(sale.averageSellingWeightKg)} كجم</p>
+                <p className="text-xs text-slate-400">الوزن الكلى عند البيع</p>
+                <p className="mt-1 font-medium text-slate-900">
+                  {formatNumber(sale.totalWeightKg)} كجم
+                </p>
               </div>
               <div className="rounded-2xl bg-[#F7FAF5] p-4">
                 <p className="text-xs text-slate-400">السعر لكل كجم</p>
-                <p className="mt-1 font-medium text-slate-900">{formatCurrency(sale.pricePerKg)}</p>
+                <p className="mt-1 font-medium text-slate-900">
+                  {formatCurrency(sale.pricePerKg)}
+                </p>
               </div>
             </div>
           ) : (
@@ -131,18 +180,27 @@ export default function Sales() {
         </SurfaceCard>
 
         <SurfaceCard className="p-5 sm:p-6">
-          <h3 className="font-heading text-lg font-semibold text-slate-900">نظرة عامة على الربحية</h3>
+          <h3 className="font-heading text-lg font-semibold text-slate-900">
+            نظرة عامة على الربحية
+          </h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl bg-[#F7FAF5] p-4">
               <p className="text-xs text-slate-400">الإيراد الفعلي</p>
               <p className="mt-1 font-medium text-slate-900">
-                {dashboard ? formatNullableNumber(dashboard.actualRevenue, formatCurrency) : "--"}
+                {dashboard
+                  ? formatNullableNumber(
+                      dashboard.actualRevenue,
+                      formatCurrency
+                    )
+                  : "--"}
               </p>
             </div>
             <div className="rounded-2xl bg-[#F7FAF5] p-4">
               <p className="text-xs text-slate-400">الربح الفعلي</p>
               <p className="mt-1 font-medium text-slate-900">
-                {dashboard ? formatNullableNumber(dashboard.actualProfit, formatCurrency) : "--"}
+                {dashboard
+                  ? formatNullableNumber(dashboard.actualProfit, formatCurrency)
+                  : "--"}
               </p>
             </div>
           </div>

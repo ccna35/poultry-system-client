@@ -9,6 +9,8 @@
     [...farmQueryKeys.all, "daily-logs", cycleId] as const,
   feedPurchases: (cycleId: string) =>
     [...farmQueryKeys.all, "feed-purchases", cycleId] as const,
+  feedBalances: (cycleId: string) =>
+    [...farmQueryKeys.all, "feed-balances", cycleId] as const,
   weightLogs: (cycleId: string) =>
     [...farmQueryKeys.all, "weight-logs", cycleId] as const,
   medicationLogs: (cycleId: string) =>
