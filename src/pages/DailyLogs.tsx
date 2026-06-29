@@ -112,7 +112,7 @@ export default function DailyLogs() {
         onOpenChange={handleDialogOpenChange}
         triggerLabel="إضافة سجل يومي"
         title="إضافة سجل يومي"
-        description="أدخل الوفيات واستهلاك العلف وبيانات البيئة اليومية."
+        description="أدخل النافق واستهلاك العلف وبيانات البيئة اليومية."
         submitLabel="حفظ السجل اليومي"
         busy={createDailyLogMutation.isPending}
         onSubmit={handleSubmit(submitDailyLog)}
@@ -126,11 +126,11 @@ export default function DailyLogs() {
         </InputField>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <InputField label="الوفيات" error={errors.deaths?.message}>
+          <InputField label="النافق" error={errors.deaths?.message}>
             <TextInput
               type="number"
               min="0"
-              {...register("deaths", { required: "عدد الوفيات مطلوب" })}
+              {...register("deaths", { required: "عدد النافق مطلوب" })}
               aria-invalid={Boolean(errors.deaths)}
             />
           </InputField>
@@ -212,7 +212,7 @@ export default function DailyLogs() {
           },
           {
             key: "deaths",
-            title: "الوفيات",
+            title: "النافق",
             render: (row: DailyLog) => formatNumber(row.deaths),
           },
           {

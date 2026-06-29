@@ -15,6 +15,18 @@ import {
   formatNullableNumber,
   formatNumber,
 } from "@/lib/format"
+import type { ExpenseCategory } from "@/types/api"
+
+const expenseCategoryArabicMap: Record<ExpenseCategory, string> = {
+  CHICKS: "كتاكيت",
+  FEED: "علف",
+  MEDICATION: "أدوية",
+  LABOR: "عمالة",
+  ELECTRICITY: "كهرباء",
+  TRANSPORT: "نقل",
+  MISC: "متفرقات",
+  OTHER: "أخرى",
+}
 
 export default function Reports() {
   const { selectedCycle, selectedCycleId } = useFarmCycle()
@@ -37,8 +49,6 @@ export default function Reports() {
       amount,
     })
   )
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
 
   return (
     <div className="space-y-5">
@@ -91,7 +101,12 @@ export default function Reports() {
           rows={expenseRows}
           emptyText="لا توجد بيانات تفصيلية للتقرير."
           columns={[
-            { key: "category", title: "الفئة", render: (row) => row.category },
+            {
+              key: "category",
+              title: "الفئة",
+              render: (row) =>
+                expenseCategoryArabicMap[row.category as ExpenseCategory],
+            },
             {
               key: "amount",
               title: "المبلغ",

@@ -12,7 +12,7 @@ import { useCreateCycleMutation } from "@/hooks/use-farm-mutations"
 import { formatCurrency, formatDate, formatNumber } from "@/lib/format"
 import { toNumber } from "@/lib/farm-utils"
 import { cn } from "@/lib/utils"
-import type { CreateCycleRequest } from "@/types/api"
+import type { CreateCycleRequest, CycleStatus } from "@/types/api"
 
 type CycleFormValues = {
   name: string
@@ -32,6 +32,11 @@ const defaultCycleValues: CycleFormValues = {
   expectedFinalWeightKg: "2.2",
   expectedSellingPricePerKg: "65",
   expectedRemainingCost: "25000",
+}
+
+const cycleStatusTranslationMap: Record<CycleStatus, string> = {
+  ACTIVE: "نشطة",
+  COMPLETED: "اكتملت",
 }
 
 export default function Cycles() {
@@ -196,7 +201,7 @@ export default function Cycles() {
                         : "bg-[#EEF2F7] text-slate-500"
                     )}
                   >
-                    {cycle.status}
+                    {cycleStatusTranslationMap[cycle.status]}
                   </span>
                 </div>
                 <h3 className="font-heading text-xl font-semibold text-slate-900">

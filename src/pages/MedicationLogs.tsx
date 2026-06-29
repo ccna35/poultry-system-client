@@ -53,6 +53,19 @@ const defaultMedicationValues: MedicationLogFormValues = {
 const selectTriggerClassName =
   "h-11 w-full rounded-2xl border border-[#E3E8DF] bg-[#FBFCF8] px-4 text-sm text-slate-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus-visible:border-[#8CB17F] focus-visible:ring-4 focus-visible:ring-[#DDECD7]"
 
+const dosageUnitTranslations: Record<DosageUnit, string> = {
+  SPOON: "ملعقة",
+  GRAM: "جرام",
+  ML: "مل",
+  CM: "سم",
+}
+
+const dosagePerUnitTranslations: Record<DosagePerUnit, string> = {
+  LITER: "لتر",
+  BIRD: "طائر",
+  KG: "كجم",
+}
+
 export default function MedicationLogs() {
   const { selectedCycleId } = useFarmCycle()
   const medicationLogsQuery = useMedicationLogsQuery(selectedCycleId)
@@ -251,7 +264,7 @@ export default function MedicationLogs() {
             key: "dose",
             title: "الجرعة",
             render: (row: MedicationLog) =>
-              `${row.dosage.amount} ${row.dosage.unit} لكل ${row.dosage.perAmount} ${row.dosage.perUnit}`,
+              `${row.dosage.amount} ${dosageUnitTranslations[row.dosage.unit]} لكل ${row.dosage.perAmount} ${dosagePerUnitTranslations[row.dosage.perUnit]}`,
           },
           {
             key: "notes",

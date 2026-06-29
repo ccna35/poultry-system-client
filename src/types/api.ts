@@ -226,7 +226,6 @@ export type CreateWeightLogRequest = {
 }
 export type DosageUnit = "SPOON" | "GRAM" | "ML" | "CM"
 export type DosagePerUnit = "LITER" | "BIRD" | "KG"
-
 export interface MedicationDosage {
     amount: number
     unit: DosageUnit

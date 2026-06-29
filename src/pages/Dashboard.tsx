@@ -79,9 +79,9 @@ export default function Dashboard() {
           iconSurfaceClassName: "bg-[#EAF7E8]",
         },
         {
-          label: "معدل الوفيات",
+          label: "معدل النافق",
           value: formatPercent(dashboard.mortalityRate),
-          meta: `${formatNumber(dashboard.totalDeaths)} إجمالى وفيات`,
+          meta: `${formatNumber(dashboard.totalDeaths)} إجمالى النافق`,
           icon: Activity,
           iconClassName: "text-[#E47B6E]",
           iconSurfaceClassName: "bg-[#FFF5F2]",
@@ -169,7 +169,7 @@ export default function Dashboard() {
       <div className="grid gap-4 xl:grid-cols-2">
         <SurfaceCard className="p-5 sm:p-6">
           <div className="mb-4">
-            <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
+            <h3 className="font-heading mt-1 text-lg font-semibold text-slate-900">
               استهلاك العلف اليومي (كجم)
             </h3>
           </div>
@@ -184,8 +184,8 @@ export default function Dashboard() {
 
         <SurfaceCard className="p-5 sm:p-6">
           <div className="mb-4">
-            <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
-              الوفيات اليومي مقابل التراكمي
+            <h3 className="font-heading mt-1 text-lg font-semibold text-slate-900">
+              النافق اليومي مقابل التراكمي
             </h3>
           </div>
           <BarLineChart
@@ -201,7 +201,7 @@ export default function Dashboard() {
         <SurfaceCard className="p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
+              <h3 className="font-heading mt-1 text-lg font-semibold text-slate-900">
                 متوسط الوزن (كجم)
               </h3>
             </div>
@@ -223,7 +223,7 @@ export default function Dashboard() {
         <SurfaceCard className="p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
+              <h3 className="font-heading mt-1 text-lg font-semibold text-slate-900">
                 درجة حرارة البيئة
               </h3>
             </div>
@@ -241,7 +241,7 @@ export default function Dashboard() {
         <SurfaceCard className="p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
+              <h3 className="font-heading mt-1 text-lg font-semibold text-slate-900">
                 الرطوبة
               </h3>
             </div>
@@ -269,7 +269,7 @@ export default function Dashboard() {
           },
           {
             key: "deaths",
-            title: "الوفيات",
+            title: "النافق",
             render: (row: DailyLog) => formatNumber(row.deaths),
           },
           {
