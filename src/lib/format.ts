@@ -1,4 +1,4 @@
-﻿const arabicNumberFormatter = new Intl.NumberFormat("ar-EG")
+const arabicNumberFormatter = new Intl.NumberFormat("ar-EG")
 
 const arabicCurrencyFormatter = new Intl.NumberFormat("ar-EG", {
     style: "currency",

@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState } from "react"
 import { Wallet } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 
 import { toast } from "@/lib/toast"
 import DataTable from "@/components/common/DataTable"
@@ -19,7 +19,11 @@ import {
 } from "@/hooks/use-farm-queries"
 import { formatCurrency, formatDate } from "@/lib/format"
 import { toNumber } from "@/lib/farm-utils"
-import type { CreateManualExpenseRequest, ExpenseCategory } from "@/types/api"
+import type {
+  CreateManualExpenseRequest,
+  ExpenseCategory,
+  ExpenseSourceType,
+} from "@/types/api"
 
 const expenseCategoryOptions: Array<{ label: string; value: ExpenseCategory }> =
   [
@@ -44,6 +48,13 @@ const expenseCategoryArabicMap: Record<ExpenseCategory, string> = {
   OTHER: "أخرى",
 }
 
+const expenseSourceTypeArMap: Record<ExpenseSourceType, string> = {
+  MANUAL: "إدخال يدوي",
+  FEED_PURCHASE: "شراء علف",
+  MEDICATION_LOG: "سجل أدوية",
+  SYSTEM: "النظام",
+}
+
 type ExpenseFormValues = {
   expenseDate: string
   category: ExpenseCategory
@@ -65,6 +76,7 @@ export default function Expenses() {
   const createExpenseMutation = useCreateExpenseMutation(selectedCycleId)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -149,10 +161,20 @@ export default function Expenses() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <InputField label="الفئة" error={errors.category?.message}>
-            <SelectInput
-              options={expenseCategoryOptions}
-              {...register("category", { required: "الفئة مطلوبة" })}
-              aria-invalid={Boolean(errors.category)}
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: "الفئة مطلوبة" }}
+              render={({ field }) => (
+                <SelectInput
+                  options={expenseCategoryOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  aria-invalid={Boolean(errors.category)}
+                />
+              )}
             />
           </InputField>
 
@@ -175,11 +197,8 @@ export default function Expenses() {
       <SurfaceCard className="p-5 sm:p-6">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500">
-              تفصيل المصروفات
-            </p>
-            <h3 className="mt-1 font-heading text-lg font-semibold text-slate-900">
-              الفئات الأعلى تكلفة
+            <h3 className="font-heading mt-1 text-lg font-semibold text-slate-900">
+              تفاصيل المصروفات
             </h3>
           </div>
           <Wallet className="size-5 text-[#74A36A]" />
@@ -234,7 +253,9 @@ export default function Expenses() {
           {
             key: "source",
             title: "المصدر",
-            render: (row) => row.sourceType ?? "MANUAL",
+            render: (row) =>
+              expenseSourceTypeArMap[row.sourceType as ExpenseSourceType] ??
+              "MANUAL",
           },
           {
             key: "desc",

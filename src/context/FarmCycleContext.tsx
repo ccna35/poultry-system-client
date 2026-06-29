@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 
 import { useCyclesQuery } from "@/hooks/use-farm-queries"

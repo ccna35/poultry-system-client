@@ -1,5 +1,8 @@
 ﻿import { createBrowserRouter } from "react-router"
 
+import GuestRoute from "@/components/auth/GuestRoute"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
+
 import AppLayout from "./layouts/AppLayout"
 
 function lazyPage<T extends { default: React.ComponentType }>(
@@ -14,48 +17,62 @@ function lazyPage<T extends { default: React.ComponentType }>(
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <AppLayout />,
+    element: <GuestRoute />,
     children: [
       {
-        index: true,
-        lazy: lazyPage(() => import("./pages/Dashboard")),
+        path: "/login",
+        lazy: lazyPage(() => import("./pages/Login")),
       },
+    ],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
       {
-        path: "cycles",
-        lazy: lazyPage(() => import("./pages/Cycles")),
-      },
-      {
-        path: "daily",
-        lazy: lazyPage(() => import("./pages/DailyLogs")),
-      },
-      {
-        path: "feed",
-        lazy: lazyPage(() => import("./pages/FeedPurchases")),
-      },
-      {
-        path: "weight",
-        lazy: lazyPage(() => import("./pages/WeightLogs")),
-      },
-      {
-        path: "medication",
-        lazy: lazyPage(() => import("./pages/MedicationLogs")),
-      },
-      {
-        path: "expenses",
-        lazy: lazyPage(() => import("./pages/Expenses")),
-      },
-      {
-        path: "sales",
-        lazy: lazyPage(() => import("./pages/Sales")),
-      },
-      {
-        path: "reports",
-        lazy: lazyPage(() => import("./pages/Reports")),
-      },
-      {
-        path: "settings",
-        lazy: lazyPage(() => import("./pages/Settings")),
+        path: "/",
+        element: <AppLayout />,
+        children: [
+          {
+            index: true,
+            lazy: lazyPage(() => import("./pages/Dashboard")),
+          },
+          {
+            path: "cycles",
+            lazy: lazyPage(() => import("./pages/Cycles")),
+          },
+          {
+            path: "daily",
+            lazy: lazyPage(() => import("./pages/DailyLogs")),
+          },
+          {
+            path: "feed",
+            lazy: lazyPage(() => import("./pages/FeedPurchases")),
+          },
+          {
+            path: "weight",
+            lazy: lazyPage(() => import("./pages/WeightLogs")),
+          },
+          {
+            path: "medication",
+            lazy: lazyPage(() => import("./pages/MedicationLogs")),
+          },
+          {
+            path: "expenses",
+            lazy: lazyPage(() => import("./pages/Expenses")),
+          },
+          {
+            path: "sales",
+            lazy: lazyPage(() => import("./pages/Sales")),
+          },
+          {
+            path: "reports",
+            lazy: lazyPage(() => import("./pages/Reports")),
+          },
+          {
+            path: "settings",
+            lazy: lazyPage(() => import("./pages/Settings")),
+          },
+        ],
       },
     ],
   },

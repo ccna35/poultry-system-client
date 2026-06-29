@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 
 import { ApiError } from "@/services/api-client"
 import { cyclesService } from "@/services/cycles.service"

@@ -1,4 +1,4 @@
-﻿import type { Cycle } from "@/types/api"
+import type { Cycle } from "@/types/api"
 
 export function getPreferredCycleId(
   cycles: Cycle[],

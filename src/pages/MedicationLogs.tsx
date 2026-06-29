@@ -45,7 +45,7 @@ const defaultMedicationValues: MedicationLogFormValues = {
     amount: "",
     unit: "",
     perAmount: "1",
-    perUnit: "لتر",
+    perUnit: "LITER",
   },
   notes: "",
 }
@@ -176,10 +176,10 @@ export default function MedicationLogs() {
                     <SelectValue placeholder="اختر الوحدة" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border border-[#E4EBDD] bg-white">
-                    <SelectItem value="جرام">جم</SelectItem>
-                    <SelectItem value="مل">مل</SelectItem>
-                    <SelectItem value="ملعقة">ملعقة</SelectItem>
-                    <SelectItem value="سم">سم</SelectItem>
+                    <SelectItem value="GRAM">جم</SelectItem>
+                    <SelectItem value="ML">مل</SelectItem>
+                    <SelectItem value="SPOON">ملعقة</SelectItem>
+                    <SelectItem value="CM">سم</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -217,9 +217,9 @@ export default function MedicationLogs() {
                     <SelectValue placeholder="اختر وحدة القياس" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border border-[#E4EBDD] bg-white">
-                    <SelectItem value="لتر">لتر</SelectItem>
-                    <SelectItem value="طائر">طائر</SelectItem>
-                    <SelectItem value="كجم">كيلو وزن</SelectItem>
+                    <SelectItem value="LITER">لتر</SelectItem>
+                    <SelectItem value="BIRD">طائر</SelectItem>
+                    <SelectItem value="KG">كيلو وزن</SelectItem>
                   </SelectContent>
                 </Select>
               )}

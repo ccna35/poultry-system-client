@@ -1,4 +1,4 @@
-﻿import Cycles from "./Cycles"
+import Cycles from "./Cycles"
 import DailyLogs from "./DailyLogs"
 import Dashboard from "./Dashboard"
 import Expenses from "./Expenses"

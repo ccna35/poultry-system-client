@@ -1,4 +1,4 @@
-﻿import { Outlet } from "react-router"
+import { Outlet } from "react-router"
 
 import { FarmCycleProvider, useFarmCycle } from "@/context/FarmCycleContext"
 import FarmSidebar, { FarmMobileNav } from "@/components/layout/FarmSidebar"

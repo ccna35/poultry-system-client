@@ -23,7 +23,7 @@ import {
   useWeightLogsQuery,
   getErrorMessage,
 } from "@/hooks/use-farm-queries"
-import { buildCumulative, getLastNumericValue } from "@/lib/farm-utils"
+import { buildCumulative } from "@/lib/farm-utils"
 import {
   formatCurrency,
   formatDate,
@@ -42,13 +42,6 @@ export default function Dashboard() {
   const dashboard = dashboardQuery.data ?? null
   const dailyLogs = dailyLogsQuery.data ?? []
   const weightLogs = weightLogsQuery.data ?? []
-
-  const latestTemperature = getLastNumericValue(
-    dashboard?.charts.temperature.map((point) => point.value) ?? []
-  )
-  const latestHumidity = getLastNumericValue(
-    dashboard?.charts.humidity.map((point) => point.value) ?? []
-  )
 
   const recentDailyLogs = React.useMemo(
     () =>

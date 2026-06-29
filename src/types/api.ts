@@ -5,6 +5,19 @@
 
 export type Nullable<T> = T | null
 
+export type AuthUser = {
+    id?: string
+    email?: Nullable<string>
+    name?: Nullable<string>
+    fullName?: Nullable<string>
+    role?: Nullable<string>
+}
+
+export type LoginRequest = {
+    email: string
+    password: string
+}
+
 export type CycleStatus = "ACTIVE" | "COMPLETED"
 export type FeedType = "STARTER" | "GROWER" | "FINISHER"
 
@@ -66,29 +79,32 @@ export type FeedPurchase = {
 }
 
 export interface FeedBalance {
-    feedType: FeedType;
-    quantityKg: number;
+    feedType: FeedType
+    quantityKg: number
 }
 
-export type FeedInventoryMovementType = 'PURCHASE' | 'CONSUMPTION' | 'ADJUSTMENT';
+export type FeedInventoryMovementType =
+    | "PURCHASE"
+    | "CONSUMPTION"
+    | "ADJUSTMENT"
 export type FeedInventoryReferenceType =
-    | 'FEED_PURCHASE'
-    | 'DAILY_LOG'
-    | 'MANUAL'
-    | 'SYSTEM';
+    | "FEED_PURCHASE"
+    | "DAILY_LOG"
+    | "MANUAL"
+    | "SYSTEM"
 
 export interface FeedInventoryMovement {
-    id: string;
-    cycleId: string;
-    movementDate: string;
-    feedType: FeedType;
-    movementType: FeedInventoryMovementType;
-    quantityKg: number;
-    referenceType: FeedInventoryReferenceType | null;
-    referenceId: string | null;
-    notes: string | null;
-    createdAt: string;
-    updatedAt: string;
+    id: string
+    cycleId: string
+    movementDate: string
+    feedType: FeedType
+    movementType: FeedInventoryMovementType
+    quantityKg: number
+    referenceType: FeedInventoryReferenceType | null
+    referenceId: string | null
+    notes: string | null
+    createdAt: string
+    updatedAt: string
 }
 
 export type WeightLog = {
@@ -208,15 +224,14 @@ export type CreateWeightLogRequest = {
     averageWeightKg: number
     notes?: Nullable<string>
 }
-
-export type DosageUnit = "ملعقة" | "جرام" | "مل" | "سم";
-export type DosagePerUnit = "لتر" | "طائر" | "كجم";
+export type DosageUnit = "SPOON" | "GRAM" | "ML" | "CM"
+export type DosagePerUnit = "LITER" | "BIRD" | "KG"
 
 export interface MedicationDosage {
-    amount: number;        // 10
-    unit: DosageUnit;      // spoon | g | ml | cc
-    perAmount?: number;    // default 1
-    perUnit: DosagePerUnit; // liter
+    amount: number
+    unit: DosageUnit
+    perAmount?: number
+    perUnit: DosagePerUnit
 }
 
 export type CreateMedicationLogRequest = {

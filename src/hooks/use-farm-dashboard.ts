@@ -1,4 +1,4 @@
-﻿import { useFarmCycle } from "@/context/FarmCycleContext"
+import { useFarmCycle } from "@/context/FarmCycleContext"
 import {
   getErrorMessage,
   useDailyLogsQuery,

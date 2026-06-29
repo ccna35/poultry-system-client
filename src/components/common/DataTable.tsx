@@ -1,4 +1,4 @@
-﻿import SurfaceCard from "@/components/common/SurfaceCard"
+import SurfaceCard from "@/components/common/SurfaceCard"
 
 type TableColumn<Row> = {
   key: string

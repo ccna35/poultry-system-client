@@ -1,4 +1,9 @@
-﻿export const farmQueryKeys = {
+﻿export const authQueryKeys = {
+  all: ["auth"] as const,
+  me: () => [...authQueryKeys.all, "me"] as const,
+}
+
+export const farmQueryKeys = {
   all: ["farm"] as const,
   cycles: () => [...farmQueryKeys.all, "cycles"] as const,
   dashboard: (cycleId: string) =>

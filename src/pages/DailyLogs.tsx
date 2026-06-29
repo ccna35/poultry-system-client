@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 
 import { feedTypeOptions } from "@/common"
 import { toast } from "@/lib/toast"
@@ -45,6 +45,7 @@ export default function DailyLogs() {
   const createDailyLogMutation = useCreateDailyLogMutation(selectedCycleId)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -166,10 +167,20 @@ export default function DailyLogs() {
           </InputField>
 
           <InputField label="نوع العلف" error={errors.feedType?.message}>
-            <SelectInput
-              options={feedTypeOptions}
-              {...register("feedType", { required: "نوع العلف مطلوب" })}
-              aria-invalid={Boolean(errors.feedType)}
+            <Controller
+              name="feedType"
+              control={control}
+              rules={{ required: "نوع العلف مطلوب" }}
+              render={({ field }) => (
+                <SelectInput
+                  options={feedTypeOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  aria-invalid={Boolean(errors.feedType)}
+                />
+              )}
             />
           </InputField>
         </div>

@@ -21,8 +21,6 @@ type LineChartProps = {
   heightClassName?: string
 }
 
-const fallbackSeries = [5, 12, 14, 19, 22, 25, 27]
-
 function formatTooltipValue(value: unknown) {
   if (typeof value === "number") {
     return formatNumber(value)
@@ -41,7 +39,7 @@ function LineChart({
   const normalizedValues = values.filter(
     (value): value is number => value !== null
   )
-  const source = normalizedValues.length > 1 ? normalizedValues : fallbackSeries
+  const source = normalizedValues.length > 1 ? normalizedValues : []
   const data = source.map((value, index) => ({
     day: `${index + 1}`,
     value,
