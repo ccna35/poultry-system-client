@@ -1,13 +1,11 @@
 ﻿import { useState } from "react"
 import { CircleDollarSign } from "lucide-react"
+import { useForm } from "react-hook-form"
 
-import ActionNotice, {
-  type StatusMessage,
-} from "@/components/common/ActionNotice"
+import { toast } from "@/lib/toast"
 import EmptyState from "@/components/common/EmptyState"
-import FormPanel from "@/components/common/FormPanel"
+import FormDialog from "@/components/common/FormDialog"
 import InputField from "@/components/common/InputField"
-import PageHeader from "@/components/common/PageHeader"
 import SurfaceCard from "@/components/common/SurfaceCard"
 import TextInput from "@/components/common/TextInput"
 import { useFarmCycle } from "@/context/FarmCycleContext"
@@ -25,16 +23,31 @@ import {
 import { toNumber } from "@/lib/farm-utils"
 import type { CreateSaleRequest } from "@/types/api"
 
+type SaleFormValues = {
+  saleDate: string
+  totalWeightKg: string
+  pricePerKg: string
+}
+
+const defaultSaleValues: SaleFormValues = {
+  saleDate: "",
+  totalWeightKg: "",
+  pricePerKg: "",
+}
+
 export default function Sales() {
-  const { selectedCycle, selectedCycleId } = useFarmCycle()
+  const { selectedCycleId } = useFarmCycle()
   const saleQuery = useSaleQuery(selectedCycleId)
   const dashboardQuery = useDashboardSummaryQuery(selectedCycleId)
   const createSaleMutation = useCreateSaleMutation(selectedCycleId)
-  const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null)
-  const [form, setForm] = useState({
-    saleDate: "",
-    totalWeightKg: "",
-    pricePerKg: "",
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<SaleFormValues>({
+    defaultValues: defaultSaleValues,
   })
 
   if (!selectedCycleId) {
@@ -46,27 +59,32 @@ export default function Sales() {
     )
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setStatusMessage(null)
+  function handleDialogOpenChange(open: boolean) {
+    setIsFormOpen(open)
 
+    if (!open) {
+      reset(defaultSaleValues)
+    }
+  }
+
+  function submitSale(values: SaleFormValues) {
     const payload: CreateSaleRequest = {
-      saleDate: form.saleDate,
-      totalWeightKg: toNumber(form.totalWeightKg),
-      pricePerKg: toNumber(form.pricePerKg),
+      saleDate: values.saleDate,
+      totalWeightKg: toNumber(values.totalWeightKg),
+      pricePerKg: toNumber(values.pricePerKg),
     }
 
     void createSaleMutation
       .mutateAsync(payload)
       .then(() => {
-        setForm({ saleDate: "", totalWeightKg: "", pricePerKg: "" })
-        setStatusMessage({ tone: "success", text: "تم تسجيل عملية البيع." })
+        reset(defaultSaleValues)
+        setIsFormOpen(false)
+        toast.success("تم تسجيل عملية البيع.")
       })
       .catch((error: unknown) => {
-        setStatusMessage({
-          tone: "error",
-          text: error instanceof Error ? error.message : "تعذر تسجيل البيع.",
-        })
+        toast.error(
+          error instanceof Error ? error.message : "تعذر تسجيل البيع."
+        )
       })
   }
 
@@ -74,73 +92,59 @@ export default function Sales() {
   const dashboard = dashboardQuery.data
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-      <div className="space-y-5">
-        <SurfaceCard className="p-5 sm:p-6">
-          <PageHeader
-            eyebrow="المبيعات"
-            title={`المبيعات - ${selectedCycle?.name ?? ""}`}
-            description="تسجيل البيع وإغلاق الدورة أصبح في صفحة مستقلة مع تحديث تلقائي للربحية والملخصات."
+    <div className="space-y-5">
+      <FormDialog
+        open={isFormOpen}
+        onOpenChange={handleDialogOpenChange}
+        triggerLabel="تسجيل عملية البيع"
+        title="إغلاق الدورة وتسجيل البيع"
+        description="أدخل بيانات البيع النهائية للدورة الحالية."
+        submitLabel="حفظ عملية البيع"
+        busy={createSaleMutation.isPending}
+        onSubmit={handleSubmit(submitSale)}
+      >
+        <InputField label="تاريخ البيع" error={errors.saleDate?.message}>
+          <TextInput
+            type="date"
+            {...register("saleDate", { required: "تاريخ البيع مطلوب" })}
+            aria-invalid={Boolean(errors.saleDate)}
           />
-        </SurfaceCard>
-        <ActionNotice message={statusMessage} />
-        <FormPanel
-          title="إغلاق الدورة وتسجيل البيع"
-          description="أدخل بيانات البيع النهائية للدورة الحالية."
-          submitLabel="حفظ عملية البيع"
-          busy={createSaleMutation.isPending}
-          onSubmit={onSubmit}
-        >
-          <InputField label="تاريخ البيع">
+        </InputField>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputField
+            label="الوزن الكلي عند البيع"
+            error={errors.totalWeightKg?.message}
+          >
             <TextInput
-              type="date"
-              value={form.saleDate}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  saleDate: event.target.value,
-                }))
-              }
-              required
+              type="number"
+              min="0.1"
+              step="0.01"
+              {...register("totalWeightKg", {
+                required: "الوزن الكلي مطلوب",
+              })}
+              aria-invalid={Boolean(errors.totalWeightKg)}
             />
           </InputField>
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputField label="الوزن الكلى عند البيع">
-              <TextInput
-                type="number"
-                min="0.1"
-                step="0.01"
-                value={form.totalWeightKg}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    totalWeightKg: event.target.value,
-                  }))
-                }
-                required
-              />
-            </InputField>
 
-            <InputField label="سعر البيع لكل كجم">
-              <TextInput
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.pricePerKg}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    pricePerKg: event.target.value,
-                  }))
-                }
-                required
-              />
-            </InputField>
-          </div>
-        </FormPanel>
-      </div>
+          <InputField
+            label="سعر البيع لكل كجم"
+            error={errors.pricePerKg?.message}
+          >
+            <TextInput
+              type="number"
+              min="0"
+              step="0.01"
+              {...register("pricePerKg", {
+                required: "سعر البيع لكل كجم مطلوب",
+              })}
+              aria-invalid={Boolean(errors.pricePerKg)}
+            />
+          </InputField>
+        </div>
+      </FormDialog>
 
-      <div className="space-y-5">
+      <div className="grid gap-5 xl:grid-cols-2">
         <SurfaceCard className="p-5 sm:p-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -160,7 +164,7 @@ export default function Sales() {
                 </p>
               </div>
               <div className="rounded-2xl bg-[#F7FAF5] p-4">
-                <p className="text-xs text-slate-400">الوزن الكلى عند البيع</p>
+                <p className="text-xs text-slate-400">الوزن الكلي عند البيع</p>
                 <p className="mt-1 font-medium text-slate-900">
                   {formatNumber(sale.totalWeightKg)} كجم
                 </p>

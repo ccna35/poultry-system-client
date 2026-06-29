@@ -25,6 +25,9 @@ async function invalidateCycleData(
     queryClient.invalidateQueries({
       queryKey: farmQueryKeys.feedPurchases(cycleId),
     }),
+    queryClient.invalidateQueries({
+      queryKey: farmQueryKeys.feedBalances(cycleId),
+    }),
     queryClient.invalidateQueries({ queryKey: farmQueryKeys.weightLogs(cycleId) }),
     queryClient.invalidateQueries({
       queryKey: farmQueryKeys.medicationLogs(cycleId),

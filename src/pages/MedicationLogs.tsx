@@ -1,28 +1,23 @@
-﻿import { useState } from "react"
+﻿import { useMemo, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 
-import ActionNotice, {
-  type StatusMessage,
-} from "@/components/common/ActionNotice"
+import { toast } from "@/lib/toast"
 import DataTable from "@/components/common/DataTable"
 import EmptyState from "@/components/common/EmptyState"
-import FormPanel from "@/components/common/FormPanel"
+import FormDialog from "@/components/common/FormDialog"
 import InputField from "@/components/common/InputField"
-import PageHeader from "@/components/common/PageHeader"
-import SurfaceCard from "@/components/common/SurfaceCard"
 import TextAreaInput from "@/components/common/TextAreaInput"
 import TextInput from "@/components/common/TextInput"
 import { useFarmCycle } from "@/context/FarmCycleContext"
 import { useCreateMedicationLogMutation } from "@/hooks/use-farm-mutations"
 import { useMedicationLogsQuery } from "@/hooks/use-farm-queries"
-import { formatCurrency, formatDate } from "@/lib/format"
-import { toNumber } from "@/lib/farm-utils"
+import { formatDate } from "@/lib/format"
 import type {
   CreateMedicationLogRequest,
   DosagePerUnit,
   DosageUnit,
   MedicationLog,
 } from "@/types/api"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -31,35 +26,56 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+type MedicationLogFormValues = {
+  date: string
+  medicineName: string
+  dosage: {
+    amount: string
+    unit: DosageUnit | ""
+    perAmount: string
+    perUnit: DosagePerUnit
+  }
+  notes: string
+}
+
+const defaultMedicationValues: MedicationLogFormValues = {
+  date: "",
+  medicineName: "",
+  dosage: {
+    amount: "",
+    unit: "",
+    perAmount: "1",
+    perUnit: "لتر",
+  },
+  notes: "",
+}
+
+const selectTriggerClassName =
+  "h-11 w-full rounded-2xl border border-[#E3E8DF] bg-[#FBFCF8] px-4 text-sm text-slate-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] focus-visible:border-[#8CB17F] focus-visible:ring-4 focus-visible:ring-[#DDECD7]"
+
 export default function MedicationLogs() {
-  const { selectedCycle, selectedCycleId } = useFarmCycle()
+  const { selectedCycleId } = useFarmCycle()
   const medicationLogsQuery = useMedicationLogsQuery(selectedCycleId)
   const createMedicationLogMutation =
     useCreateMedicationLogMutation(selectedCycleId)
-  const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null)
-  type MedicationLogFormState = {
-    date: string
-    medicineName: string
-    dosage: {
-      amount: string
-      unit: DosageUnit | ""
-      perAmount: string
-      perUnit: DosagePerUnit
-    }
-    notes: string
-  }
-
-  const [form, setForm] = useState<MedicationLogFormState>({
-    date: "",
-    medicineName: "",
-    dosage: {
-      amount: "",
-      unit: "",
-      perAmount: "1",
-      perUnit: "لتر",
-    },
-    notes: "",
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<MedicationLogFormValues>({
+    defaultValues: defaultMedicationValues,
   })
+
+  const rows = useMemo(
+    () =>
+      [...(medicationLogsQuery.data ?? [])].sort((left, right) =>
+        right.date.localeCompare(left.date)
+      ),
+    [medicationLogsQuery.data]
+  )
 
   if (!selectedCycleId) {
     return (
@@ -70,172 +86,151 @@ export default function MedicationLogs() {
     )
   }
 
-  const updateDosage = (field: keyof typeof form.dosage, value: string) => {
-    setForm((current) => ({
-      ...current,
-      dosage: {
-        ...current.dosage,
-        [field]: value,
-      },
-    }))
+  function handleDialogOpenChange(open: boolean) {
+    setIsFormOpen(open)
+
+    if (!open) {
+      reset(defaultMedicationValues)
+    }
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setStatusMessage(null)
-
+  function submitMedication(values: MedicationLogFormValues) {
     const payload: CreateMedicationLogRequest = {
-      date: form.date,
-      medicineName: form.medicineName,
+      date: values.date,
+      medicineName: values.medicineName,
       dosage: {
-        amount: Number(form.dosage.amount),
-        unit: form.dosage.unit as DosageUnit,
-        perAmount: Number(form.dosage.perAmount || 1),
-        perUnit: form.dosage.perUnit,
+        amount: Number(values.dosage.amount),
+        unit: values.dosage.unit as DosageUnit,
+        perAmount: Number(values.dosage.perAmount || 1),
+        perUnit: values.dosage.perUnit,
       },
-      notes: form.notes.trim() === "" ? null : form.notes,
+      notes: values.notes.trim() === "" ? null : values.notes,
     }
 
     void createMedicationLogMutation
       .mutateAsync(payload)
       .then(() => {
-        setForm({
-          date: "",
-          medicineName: "",
-          dosage: {
-            amount: "",
-            unit: "",
-            perAmount: "1",
-            perUnit: "liter",
-          },
-          notes: "",
-        })
-        setStatusMessage({ tone: "success", text: "تم حفظ سجل الدواء." })
+        reset(defaultMedicationValues)
+        setIsFormOpen(false)
+        toast.success("تم حفظ سجل الدواء.")
       })
       .catch((error: unknown) => {
-        setStatusMessage({
-          tone: "error",
-          text: error instanceof Error ? error.message : "تعذر حفظ سجل الدواء.",
-        })
+        toast.error(
+          error instanceof Error ? error.message : "تعذر حفظ سجل الدواء."
+        )
       })
   }
 
-  const rows = [...(medicationLogsQuery.data ?? [])].sort((left, right) =>
-    right.date.localeCompare(left.date)
-  )
-
   return (
-    <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-      <div className="space-y-5">
-        {/* <SurfaceCard className="p-5 sm:p-6">
-          <PageHeader
-            eyebrow="الأدوية"
-            title={`سجلات الأدوية - ${selectedCycle?.name ?? ""}`}
-            description="صفحة مخصصة لتسجيل العلاج والتكلفة بعيدًا عن الصفحة الرئيسية."
+    <div className="space-y-5">
+      <FormDialog
+        open={isFormOpen}
+        onOpenChange={handleDialogOpenChange}
+        triggerLabel="إضافة سجل دواء"
+        title="إضافة سجل دواء"
+        description="أدخل اسم الدواء والجرعة."
+        submitLabel="حفظ الدواء"
+        busy={createMedicationLogMutation.isPending}
+        onSubmit={handleSubmit(submitMedication)}
+      >
+        <InputField label="التاريخ" error={errors.date?.message}>
+          <TextInput
+            type="date"
+            {...register("date", { required: "التاريخ مطلوب" })}
+            aria-invalid={Boolean(errors.date)}
           />
-        </SurfaceCard> */}
-        <ActionNotice message={statusMessage} />
-        <FormPanel
-          title="إضافة سجل دواء"
-          description="أدخل اسم الدواء والجرعة والتكلفة."
-          submitLabel="حفظ الدواء"
-          busy={createMedicationLogMutation.isPending}
-          onSubmit={onSubmit}
-        >
-          <InputField label="التاريخ">
+        </InputField>
+
+        <InputField label="اسم الدواء" error={errors.medicineName?.message}>
+          <TextInput
+            {...register("medicineName", { required: "اسم الدواء مطلوب" })}
+            aria-invalid={Boolean(errors.medicineName)}
+          />
+        </InputField>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputField label="الكمية" error={errors.dosage?.amount?.message}>
             <TextInput
-              type="date"
-              value={form.date}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, date: event.target.value }))
-              }
-              required
+              type="number"
+              min="0"
+              step="0.01"
+              {...register("dosage.amount", { required: "الكمية مطلوبة" })}
+              aria-invalid={Boolean(errors.dosage?.amount)}
             />
           </InputField>
-          <InputField label="اسم الدواء">
+
+          <InputField label="وحدة الجرعة" error={errors.dosage?.unit?.message}>
+            <Controller
+              name="dosage.unit"
+              control={control}
+              rules={{ required: "اختر وحدة الجرعة" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value || undefined}
+                  onValueChange={(value) => field.onChange(value as DosageUnit)}
+                >
+                  <SelectTrigger
+                    className={selectTriggerClassName}
+                    aria-invalid={Boolean(errors.dosage?.unit)}
+                  >
+                    <SelectValue placeholder="اختر الوحدة" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border border-[#E4EBDD] bg-white">
+                    <SelectItem value="جرام">جم</SelectItem>
+                    <SelectItem value="مل">مل</SelectItem>
+                    <SelectItem value="ملعقة">ملعقة</SelectItem>
+                    <SelectItem value="سم">سم</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </InputField>
+
+          <InputField label="لكل" error={errors.dosage?.perAmount?.message}>
             <TextInput
-              value={form.medicineName}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  medicineName: event.target.value,
-                }))
-              }
-              required
+              type="number"
+              min="1"
+              step="0.01"
+              {...register("dosage.perAmount", {
+                required: "قيمة لكل مطلوبة",
+              })}
+              aria-invalid={Boolean(errors.dosage?.perAmount)}
             />
           </InputField>
-          <div className="grid gap-4 md:grid-cols-4">
-            <InputField label="الكمية">
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.dosage.amount}
-                onChange={(event) => updateDosage("amount", event.target.value)}
-                required
-              />
-            </InputField>
 
-            <InputField label="وحدة الجرعة">
-              <Select
-                value={form.dosage.unit}
-                onValueChange={(value) => updateDosage("unit", value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="اختر الوحدة" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="جرام">جم</SelectItem>
-                  <SelectItem value="مل">مل</SelectItem>
-                  <SelectItem value="ملعقة">ملعقة</SelectItem>
-                </SelectContent>
-              </Select>
-            </InputField>
-
-            <InputField label="لكل">
-              <Input
-                type="number"
-                min="1"
-                step="0.01"
-                value={form.dosage.perAmount}
-                onChange={(event) =>
-                  updateDosage("perAmount", event.target.value)
-                }
-                required
-              />
-            </InputField>
-
-            <InputField label="وحدة القياس">
-              <Select
-                value={form.dosage.perUnit}
-                onValueChange={(value) => updateDosage("perUnit", value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="اختر وحدة القياس" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="لتر">لتر</SelectItem>
-                  <SelectItem value="طائر">طائر</SelectItem>
-                  <SelectItem value="كجم">كيلو وزن</SelectItem>
-                </SelectContent>
-              </Select>
-            </InputField>
-          </div>
-          <InputField label="ملاحظات">
-            <TextAreaInput
-              value={form.notes}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  notes: event.target.value,
-                }))
-              }
+          <InputField
+            label="وحدة القياس"
+            error={errors.dosage?.perUnit?.message}
+          >
+            <Controller
+              name="dosage.perUnit"
+              control={control}
+              rules={{ required: "اختر وحدة القياس" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) =>
+                    field.onChange(value as DosagePerUnit)
+                  }
+                >
+                  <SelectTrigger className={selectTriggerClassName}>
+                    <SelectValue placeholder="اختر وحدة القياس" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border border-[#E4EBDD] bg-white">
+                    <SelectItem value="لتر">لتر</SelectItem>
+                    <SelectItem value="طائر">طائر</SelectItem>
+                    <SelectItem value="كجم">كيلو وزن</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             />
           </InputField>
-        </FormPanel>
-      </div>
+        </div>
+
+        <InputField label="ملاحظات" error={errors.notes?.message}>
+          <TextAreaInput {...register("notes")} />
+        </InputField>
+      </FormDialog>
 
       <DataTable
         title="سجلات الأدوية"

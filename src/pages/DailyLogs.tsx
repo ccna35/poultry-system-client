@@ -1,14 +1,13 @@
-﻿import { useState } from "react"
+﻿import { useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
 
-import ActionNotice, {
-  type StatusMessage,
-} from "@/components/common/ActionNotice"
+import { feedTypeOptions } from "@/common"
+import { toast } from "@/lib/toast"
 import DataTable from "@/components/common/DataTable"
 import EmptyState from "@/components/common/EmptyState"
-import FormPanel from "@/components/common/FormPanel"
+import FormDialog from "@/components/common/FormDialog"
 import InputField from "@/components/common/InputField"
-import PageHeader from "@/components/common/PageHeader"
-import SurfaceCard from "@/components/common/SurfaceCard"
+import SelectInput from "@/components/common/SelectInput"
 import TextAreaInput from "@/components/common/TextAreaInput"
 import TextInput from "@/components/common/TextInput"
 import { useFarmCycle } from "@/context/FarmCycleContext"
@@ -17,24 +16,50 @@ import { useDailyLogsQuery } from "@/hooks/use-farm-queries"
 import { formatDate, formatNullableNumber, formatNumber } from "@/lib/format"
 import { toNumber, toOptionalNumber } from "@/lib/farm-utils"
 import type { CreateDailyLogRequest, DailyLog, FeedType } from "@/types/api"
-import SelectInput from "@/components/common/SelectInput"
-import { feedTypeOptions } from "@/common"
+
+type DailyLogFormValues = {
+  date: string
+  deaths: string
+  feedConsumedKg: string
+  feedType: FeedType
+  waterConsumedLiters: string
+  temperature: string
+  humidity: string
+  notes: string
+}
+
+const defaultDailyLogValues: DailyLogFormValues = {
+  date: "",
+  deaths: "0",
+  feedConsumedKg: "",
+  feedType: "STARTER",
+  waterConsumedLiters: "",
+  temperature: "",
+  humidity: "",
+  notes: "",
+}
 
 export default function DailyLogs() {
-  const { selectedCycle, selectedCycleId } = useFarmCycle()
+  const { selectedCycleId } = useFarmCycle()
   const dailyLogsQuery = useDailyLogsQuery(selectedCycleId)
   const createDailyLogMutation = useCreateDailyLogMutation(selectedCycleId)
-  const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null)
-  const [form, setForm] = useState({
-    date: "",
-    deaths: "0",
-    feedConsumedKg: "",
-    feedType: "STARTER" as FeedType,
-    temperature: "",
-    waterConsumedLiters: "",
-    humidity: "",
-    notes: "",
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<DailyLogFormValues>({
+    defaultValues: defaultDailyLogValues,
   })
+
+  const rows = useMemo(
+    () =>
+      [...(dailyLogsQuery.data ?? [])].sort((left, right) =>
+        right.date.localeCompare(left.date)
+      ),
+    [dailyLogsQuery.data]
+  )
 
   if (!selectedCycleId) {
     return (
@@ -45,179 +70,124 @@ export default function DailyLogs() {
     )
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setStatusMessage(null)
+  function handleDialogOpenChange(open: boolean) {
+    setIsFormOpen(open)
 
+    if (!open) {
+      reset(defaultDailyLogValues)
+    }
+  }
+
+  function submitDailyLog(values: DailyLogFormValues) {
     const payload: CreateDailyLogRequest = {
-      date: form.date,
-      deaths: toNumber(form.deaths),
-      feedConsumedKg: toNumber(form.feedConsumedKg),
-      feedType: form.feedType,
-      waterConsumedLiters: toNumber(form.waterConsumedLiters),
-      temperature: toOptionalNumber(form.temperature),
-      humidity: toOptionalNumber(form.humidity),
-      notes: form.notes.trim() === "" ? null : form.notes,
+      date: values.date,
+      deaths: toNumber(values.deaths),
+      feedConsumedKg: toNumber(values.feedConsumedKg),
+      feedType: values.feedType,
+      waterConsumedLiters: toNumber(values.waterConsumedLiters),
+      temperature: toOptionalNumber(values.temperature),
+      humidity: toOptionalNumber(values.humidity),
+      notes: values.notes.trim() === "" ? null : values.notes,
     }
 
     void createDailyLogMutation
       .mutateAsync(payload)
       .then(() => {
-        setForm({
-          date: "",
-          deaths: "0",
-          feedConsumedKg: "",
-          feedType: "STARTER",
-          waterConsumedLiters: "",
-          temperature: "",
-          humidity: "",
-          notes: "",
-        })
-        setStatusMessage({ tone: "success", text: "تمت إضافة السجل اليومي." })
+        reset(defaultDailyLogValues)
+        setIsFormOpen(false)
+        toast.success("تمت إضافة السجل اليومي.")
       })
       .catch((error: unknown) => {
-        console.log("error", error)
-
-        setStatusMessage({
-          tone: "error",
-          text:
-            error instanceof Error ? error.message : "تعذر حفظ السجل اليومي.",
-        })
+        toast.error(
+          error instanceof Error ? error.message : "تعذر حفظ السجل اليومي."
+        )
       })
   }
 
-  const rows = [...(dailyLogsQuery.data ?? [])].sort((left, right) =>
-    right.date.localeCompare(left.date)
-  )
-
   return (
-    <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-      <div className="space-y-5">
-        <SurfaceCard className="p-5 sm:p-6">
-          <PageHeader
-            eyebrow="اليومي"
-            title={`العمليات اليومية - ${selectedCycle?.name ?? ""}`}
-            description="صفحة مستقلة لتسجيل الوفيات واستهلاك العلف والبيئة اليومية بدل إبقائها كقسم داخل App.tsx."
+    <div className="space-y-5">
+      <FormDialog
+        open={isFormOpen}
+        onOpenChange={handleDialogOpenChange}
+        triggerLabel="إضافة سجل يومي"
+        title="إضافة سجل يومي"
+        description="أدخل الوفيات واستهلاك العلف وبيانات البيئة اليومية."
+        submitLabel="حفظ السجل اليومي"
+        busy={createDailyLogMutation.isPending}
+        onSubmit={handleSubmit(submitDailyLog)}
+      >
+        <InputField label="التاريخ" error={errors.date?.message}>
+          <TextInput
+            type="date"
+            {...register("date", { required: "التاريخ مطلوب" })}
+            aria-invalid={Boolean(errors.date)}
           />
-        </SurfaceCard>
-        <ActionNotice message={statusMessage} />
-        <FormPanel
-          title="إضافة سجل يومي"
-          description="أدخل الوفيات واستهلاك العلف وبيانات البيئة اليومية."
-          submitLabel="حفظ السجل اليومي"
-          busy={createDailyLogMutation.isPending}
-          onSubmit={onSubmit}
-        >
-          <InputField label="التاريخ">
+        </InputField>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputField label="الوفيات" error={errors.deaths?.message}>
             <TextInput
-              type="date"
-              value={form.date}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, date: event.target.value }))
-              }
-              required
+              type="number"
+              min="0"
+              {...register("deaths", { required: "عدد الوفيات مطلوب" })}
+              aria-invalid={Boolean(errors.deaths)}
             />
           </InputField>
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputField label="الوفيات">
-              <TextInput
-                type="number"
-                min="0"
-                value={form.deaths}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    deaths: event.target.value,
-                  }))
-                }
-                required
-              />
-            </InputField>
-            <InputField label="استهلاك المياه">
-              <TextInput
-                type="number"
-                min="0"
-                value={form.waterConsumedLiters}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    waterConsumedLiters: event.target.value,
-                  }))
-                }
-                required
-              />
-            </InputField>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputField label="استهلاك العلف (كجم)">
-              <TextInput
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.feedConsumedKg}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    feedConsumedKg: event.target.value,
-                  }))
-                }
-                required
-              />
-            </InputField>
-            <InputField label="نوع العلف">
-              <SelectInput
-                value={form.feedType}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    feedType: event.target.value as FeedType,
-                  }))
-                }
-                options={feedTypeOptions}
-              />
-            </InputField>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <InputField label="الحرارة">
-              <TextInput
-                type="number"
-                step="0.1"
-                value={form.temperature}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    temperature: event.target.value,
-                  }))
-                }
-              />
-            </InputField>
-            <InputField label="الرطوبة">
-              <TextInput
-                type="number"
-                step="0.1"
-                value={form.humidity}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    humidity: event.target.value,
-                  }))
-                }
-              />
-            </InputField>
-          </div>
-          <InputField label="ملاحظات">
-            <TextAreaInput
-              value={form.notes}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  notes: event.target.value,
-                }))
-              }
+
+          <InputField
+            label="استهلاك المياه"
+            error={errors.waterConsumedLiters?.message}
+          >
+            <TextInput
+              type="number"
+              min="0"
+              {...register("waterConsumedLiters", {
+                required: "استهلاك المياه مطلوب",
+              })}
+              aria-invalid={Boolean(errors.waterConsumedLiters)}
             />
           </InputField>
-        </FormPanel>
-      </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputField
+            label="استهلاك العلف (كجم)"
+            error={errors.feedConsumedKg?.message}
+          >
+            <TextInput
+              type="number"
+              min="0"
+              step="0.01"
+              {...register("feedConsumedKg", {
+                required: "استهلاك العلف مطلوب",
+              })}
+              aria-invalid={Boolean(errors.feedConsumedKg)}
+            />
+          </InputField>
+
+          <InputField label="نوع العلف" error={errors.feedType?.message}>
+            <SelectInput
+              options={feedTypeOptions}
+              {...register("feedType", { required: "نوع العلف مطلوب" })}
+              aria-invalid={Boolean(errors.feedType)}
+            />
+          </InputField>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <InputField label="الحرارة" error={errors.temperature?.message}>
+            <TextInput type="number" step="0.1" {...register("temperature")} />
+          </InputField>
+
+          <InputField label="الرطوبة" error={errors.humidity?.message}>
+            <TextInput type="number" step="0.1" {...register("humidity")} />
+          </InputField>
+        </div>
+
+        <InputField label="ملاحظات" error={errors.notes?.message}>
+          <TextAreaInput {...register("notes")} />
+        </InputField>
+      </FormDialog>
 
       <DataTable
         title="آخر العمليات اليومية"

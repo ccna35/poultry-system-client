@@ -1,22 +1,7 @@
-﻿import {
-  Bell,
-  CalendarDays,
-  ChevronDown,
-  RefreshCw,
-  SunMedium,
-} from "lucide-react"
+﻿import { SunMedium } from "lucide-react"
 
 import SurfaceCard from "@/components/common/SurfaceCard"
-import { Button } from "@/components/ui/button"
 import type { Cycle } from "@/types/api"
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 type FarmTopbarProps = {
   cycles: Cycle[]
@@ -26,13 +11,7 @@ type FarmTopbarProps = {
   onRefresh: () => void
 }
 
-function FarmTopbar({
-  cycles,
-  selectedCycleId,
-  isLoading,
-  onCycleChange,
-  onRefresh,
-}: FarmTopbarProps) {
+function FarmTopbar({ cycles, selectedCycleId }: FarmTopbarProps) {
   const currentCycleName = cycles.filter(
     (cycle) => cycle.id === selectedCycleId
   )[0]?.name
@@ -46,7 +25,7 @@ function FarmTopbar({
           </div>
           <div>
             <h2 className="font-heading text-2xl font-semibold text-slate-900">
-              صباح الخير، مدير المزرعة
+              صباح الخير
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               إليك ملخص ما يحدث في المزرعة اليوم.

@@ -12,7 +12,6 @@ import {
 
 import DataTable from "@/components/common/DataTable"
 import EmptyState from "@/components/common/EmptyState"
-import PageHeader from "@/components/common/PageHeader"
 import SurfaceCard from "@/components/common/SurfaceCard"
 import BarLineChart from "@/components/dashboard/BarLineChart"
 import LineChart from "@/components/dashboard/LineChart"
@@ -24,11 +23,7 @@ import {
   useWeightLogsQuery,
   getErrorMessage,
 } from "@/hooks/use-farm-queries"
-import {
-  buildCumulative,
-  deriveHealthState,
-  getLastNumericValue,
-} from "@/lib/farm-utils"
+import { buildCumulative, getLastNumericValue } from "@/lib/farm-utils"
 import {
   formatCurrency,
   formatDate,
@@ -39,7 +34,7 @@ import {
 import type { DailyLog } from "@/types/api"
 
 export default function Dashboard() {
-  const { selectedCycle, selectedCycleId, refreshAll } = useFarmCycle()
+  const { selectedCycle, selectedCycleId } = useFarmCycle()
   const dashboardQuery = useDashboardSummaryQuery(selectedCycleId)
   const dailyLogsQuery = useDailyLogsQuery(selectedCycleId)
   const weightLogsQuery = useWeightLogsQuery(selectedCycleId)
@@ -53,10 +48,6 @@ export default function Dashboard() {
   )
   const latestHumidity = getLastNumericValue(
     dashboard?.charts.humidity.map((point) => point.value) ?? []
-  )
-  const healthState = deriveHealthState(
-    latestTemperature ?? null,
-    latestHumidity ?? null
   )
 
   const recentDailyLogs = React.useMemo(
@@ -75,15 +66,6 @@ export default function Dashboard() {
     () => buildCumulative(mortalityBars),
     [mortalityBars]
   )
-  const targetWeightSeries = React.useMemo(() => {
-    const actualValues = dashboard?.charts.averageWeightKg ?? []
-    const targetWeight = selectedCycle?.expectedFinalWeightKg ?? 2.2
-
-    return actualValues.map(
-      (_, index) =>
-        ((index + 1) / Math.max(actualValues.length, 1)) * targetWeight
-    )
-  }, [dashboard, selectedCycle])
 
   const metrics = dashboard
     ? [

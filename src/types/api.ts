@@ -1,4 +1,4 @@
-export type ApiEnvelope<T> = {
+﻿export type ApiEnvelope<T> = {
     success: boolean
     data: T
 }
@@ -45,6 +45,7 @@ export type DailyLog = {
     date: string
     deaths: number
     feedConsumedKg: number
+    feedType: FeedType
     waterConsumedLiters: number
     temperature: Nullable<number>
     humidity: Nullable<number>
@@ -67,6 +68,27 @@ export type FeedPurchase = {
 export interface FeedBalance {
     feedType: FeedType;
     quantityKg: number;
+}
+
+export type FeedInventoryMovementType = 'PURCHASE' | 'CONSUMPTION' | 'ADJUSTMENT';
+export type FeedInventoryReferenceType =
+    | 'FEED_PURCHASE'
+    | 'DAILY_LOG'
+    | 'MANUAL'
+    | 'SYSTEM';
+
+export interface FeedInventoryMovement {
+    id: string;
+    cycleId: string;
+    movementDate: string;
+    feedType: FeedType;
+    movementType: FeedInventoryMovementType;
+    quantityKg: number;
+    referenceType: FeedInventoryReferenceType | null;
+    referenceId: string | null;
+    notes: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export type WeightLog = {
