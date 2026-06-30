@@ -1,4 +1,4 @@
-﻿import { Bird, LoaderCircle, LockKeyhole, Mail } from "lucide-react"
+import { LoaderCircle, LockKeyhole, Mail } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useNavigate, useSearchParams } from "react-router"
 
@@ -22,7 +22,7 @@ function getLoginErrorMessage(error: unknown) {
     return error.message
   }
 
-  return "تعذر تسجيل الدخول. حاول مرة أخرى بعد قليل."
+  return "???? ????? ??????. ???? ??? ???? ??? ????."
 }
 
 export default function Login() {
@@ -44,7 +44,7 @@ export default function Login() {
   async function onSubmit(values: LoginFormValues) {
     try {
       await loginMutation.mutateAsync(values)
-      toast.success("تم تسجيل الدخول بنجاح.")
+      toast.success("?? ????? ?????? ?????.")
       navigate(redirectPath, { replace: true })
     } catch (error) {
       toast.error(getLoginErrorMessage(error))
@@ -62,10 +62,10 @@ export default function Login() {
           </div>
           <div>
             <h2 className="font-heading text-2xl font-semibold text-slate-900">
-              تسجيل الدخول
+              ????? ??????
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              أدخل بيانات الحساب للوصول إلى لوحة الإدارة.
+              ???? ?????? ?????? ?????? ??? ???? ???????.
             </p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function Login() {
               className="text-sm font-medium text-slate-700"
               htmlFor="email"
             >
-              البريد الإلكتروني
+              ?????? ??????????
             </label>
             <div className="relative">
               <Mail className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
@@ -93,10 +93,10 @@ export default function Login() {
                 className="h-11 rounded-2xl border-[#E2E8D9] bg-[#FCFDFB] ps-10 text-sm shadow-none"
                 aria-invalid={errors.email ? true : undefined}
                 {...register("email", {
-                  required: "أدخل البريد الإلكتروني.",
+                  required: "???? ?????? ??????????.",
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "أدخل بريدًا إلكترونيًا صحيحًا.",
+                    message: "???? ?????? ?????????? ??????.",
                   },
                 })}
               />
@@ -111,7 +111,7 @@ export default function Login() {
               className="text-sm font-medium text-slate-700"
               htmlFor="password"
             >
-              كلمة المرور
+              ???? ??????
             </label>
             <div className="relative">
               <LockKeyhole className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
@@ -119,11 +119,11 @@ export default function Login() {
                 id="password"
                 type="password"
                 autoComplete="current-password"
-                placeholder="••••••••"
+                placeholder="��������"
                 className="h-11 rounded-2xl border-[#E2E8D9] bg-[#FCFDFB] ps-10 text-sm shadow-none"
                 aria-invalid={errors.password ? true : undefined}
                 {...register("password", {
-                  required: "أدخل كلمة المرور.",
+                  required: "???? ???? ??????.",
                 })}
               />
             </div>
@@ -143,10 +143,10 @@ export default function Login() {
             {isPending ? (
               <>
                 <LoaderCircle className="size-4 animate-spin" />
-                جارٍ تسجيل الدخول
+                ???? ????? ??????
               </>
             ) : (
-              "دخول"
+              "????"
             )}
           </Button>
         </form>
@@ -154,3 +154,4 @@ export default function Login() {
     </div>
   )
 }
+

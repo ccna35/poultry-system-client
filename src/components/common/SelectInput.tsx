@@ -1,5 +1,3 @@
-﻿import * as React from "react"
-
 import {
   Select,
   SelectContent,
@@ -74,3 +72,5 @@ function SelectInput({
 }
 
 export default SelectInput
+
+
